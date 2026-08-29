@@ -773,50 +773,59 @@ const restaurants = [
 // your code here
 function distance(restaurantLocation, myLocation) {
   return Math.sqrt(
-    [restaurantLocation[0] - myLocation[0]] ** 2 +
+    (restaurantLocation[0] - myLocation[0]) ** 2 +
       (restaurantLocation[1] - myLocation[1]) ** 2
   );
-
-  const options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0
-    };
 }
+
+const options = {
+  enableHighAccuracy: true,
+  timeout: 5000,
+  maximumAge: 0,
+};
 
 function success(pos) {
-      const crd = pos.coords;
+  const crd = pos.coords;
+
+  console.log(crd);
+
+  restaurants.sort(function (a, b) {
+    const etaisyysA = distance(a.location.coordinates, [
+      crd.longitude,
+      crd.latitude,
+    ]);
+
+    const etaisyysB = distance(b.location.coordinates, [
+      crd.longitude,
+      crd.latitude,
+    ]);
+
+    return etaisyysA - etaisyysB;
+  });
+
+  console.log(restaurants);
+  const target = document.querySelector('table');
+
+  for (const restaurant of restaurants) {
+    const tr = document.createElement('tr');
+
+    const nameTd = document.createElement('td');
+    nameTd.innerText = restaurant.name;
+
+    const addressTd = document.createElement('td');
+    addressTd.innerText = restaurant.address;
+
+    const companyTd = document.createElement('td');
+    companyTd.innerText = restaurant.company;
+
+    tr.append(nameTd, addressTd, companyTd);
+
+    target.append(tr);
+  }
 }
 
-      console.log(crd);
+function error(err) {
+  console.warn(`ERROR(${err.code}): ${err.message}`);
+}
 
-      restaurants.sort(function (a, b){
-        const etaisyysA = distance(a.location.coordinates, [crd.longitude, crd.latitude]);
-        const etaisyysB = distance(b.location.coordinates, [crd.longitude, crd.latitude]);
-        return etaisyysA - etaisyysB;
-      });
-
-      console.log(restaurants);
-      for (const restaurant of restaurants) {
-
-        const tr = document.createElement('tr');
-        const tdName = document.createElement('td');
-        tdname.innerText = restaurant.name;
-
-        const tdAddress = document.createElement('td');
-        tdAddress.innerText = restaurant.address;
-
-        const tdCompany = document.createElement('td');
-        tdCompany.innerText = restaurant.company;
-
-        tr.append(tdName, tdAddress, tdCompany);
-
-        target.append(tr);
-
-      }
-
-      function error(err) {
-      console.warn(`ERROR(${err.code}): ${err.message}`);
-    }
-
-    navigator.geolocation.getCurrentPosition(success, error);
+navigator.geolocation.getCurrentPosition(success, error, options);
